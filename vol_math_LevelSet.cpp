@@ -37,6 +37,7 @@ Raw2D Dirac(Raw2D *x,double sigma)
 /************************************************************************/
 /* natural                                                                     */
 /************************************************************************/
+/*
 Raw2D* gradientx(Raw2D *g)
 {
 	int n=g->getXsize();
@@ -68,7 +69,9 @@ Raw2D* gradientx(Raw2D *g)
 		}
 	}
 	return ret;
-}
+}*/
+
+/*
 Raw2D* gradientxgorignal(Raw2D *g)
 {
 	int n=g->getXsize();
@@ -86,15 +89,16 @@ Raw2D* gradientxgorignal(Raw2D *g)
 				temp1=j-1;
 			else 
 				temp1=0;
-			/*if(j<m-1)
+			/ *if(j<m-1)
 				temp2=j+1;
 			else 
-				temp2=m-1;*/
+				temp2=m-1;* /
 			ret->put(i,j,(g->get(i,temp1+1)-g->get(i,temp1)));
 		}
 	}
 	return ret;
-}
+}*/
+
 /************************************************************************/
 /* central gradient                                                                     */
 /************************************************************************/
@@ -127,6 +131,7 @@ Raw2D* gradientxgc(Raw2D *g)
 /************************************************************************/
 /* symmetry                                                                     */
 /************************************************************************/
+/*
 Raw2D* gradientxg(Raw2D *g)
 {
 	int n=g->getXsize();
@@ -156,7 +161,9 @@ Raw2D* gradientxg(Raw2D *g)
 	}
 		
 	return ret;
-}
+}*/
+
+/*
 Raw2D* gradienty(Raw2D* g )
 {
 	int n=g->getXsize();
@@ -185,7 +192,9 @@ Raw2D* gradienty(Raw2D* g )
 		}
 	}
 	return ret;
-}
+}*/
+
+/*
 Raw2D* gradientyg(Raw2D* g )
 {
 	int n=g->getXsize();
@@ -213,7 +222,8 @@ Raw2D* gradientyg(Raw2D* g )
 	}
 	return ret;
 
-}
+}*/
+
 
 Raw2D* gradientygc(Raw2D *g)
 {
@@ -242,6 +252,7 @@ Raw2D* gradientygc(Raw2D *g)
 
 	return ret;
 }
+/*
 Raw2D* gradientygcorignal(Raw2D *g)
 {
 	int n=g->getXsize();
@@ -272,7 +283,8 @@ Raw2D* gradientygcorignal(Raw2D *g)
 		}
 	}
 	return ret;
-}
+}*/
+
 Raw2D cos(Raw2D &xdata)
 {
 	
@@ -357,7 +369,7 @@ Raw2D* del2(Raw2D *phi)
 {
 	int m=phi->getXsize();
 	int n=phi->getYsize();
-	Raw2D *ret2=new Raw2D(m, n);
+	Raw2D ret2(m,n);
 
 	for (int i=0;i<m;i++)
 	{

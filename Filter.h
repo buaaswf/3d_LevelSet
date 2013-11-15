@@ -64,12 +64,12 @@ public:
 //		Raw2D* pSmoothY, PIXTYPE sigmaC, PIXTYPE sigmaS, int filterSize); 
 //
 //	//Builds the stack of min-max image gradients; returns the range variance
-//	PIXTYPE buildMinMaxImageStack(Raw2D *src,Raw2D* pX, Raw2D* pY, Raw3D* pMinStack,
-//		Raw3D* pMaxStack , int levelMax, PIXTYPE beta); 
+//	PIXTYPE buildMinMaxImageStack(Raw2D *src,Raw2D* pX, Raw2D* pY, RawArray* pMinStack,
+//		RawArray* pMaxStack , int levelMax, PIXTYPE beta); 
 //
 //	//Finds the adaptive neighborhood size (stack level) 
 //	//from the min-max gradient stack
-//	void findAdaptiveRegion(Raw2D *src,Raw3D* pMinStack, Raw3D* pMaxStack, PIXTYPE R, int levelMax); 
+//	void findAdaptiveRegion(Raw2D *src,RawArray* pMinStack, RawArray* pMaxStack, PIXTYPE R, int levelMax); 
 //
 //	//Filters the detail signal and computes the final output image	
 //	void DetailBilateralFilter(Raw2D* srcImg, Raw2D* pSmoothX, Raw2D* pSmoothY, 

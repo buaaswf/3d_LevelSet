@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include "Filter.h"
 using namespace std;
+static float lgtt=log10(2.0f);
+//#define PIXTYPE double
+#define M_EXP 2.7182818284590452353602874713527
 Raw3D_Independt::Raw3D_Independt(void)
 {
 }
@@ -14,8 +17,7 @@ Raw3D_Independt::~Raw3D_Independt(void)
 {
 }
 
-static float lgtt=log10(2.0f);
-#define M_EXP 2.7182818284590452353602874713527
+
 
 Raw2D::Raw2D()
 {
@@ -72,28 +74,42 @@ Raw2D::~Raw2D(void)
 		delete [] this->data;
 	data=NULL;
 }
-
-/* Raw3D::Raw3D(void)
+Raw2D operator/(const PIXTYPE val, const Raw2D& img)
+{
+	Raw2D res(img);
+	for (int i = 0; i < img.size(); ++i)
+		res.data[i] = val/res.data[i];
+	return res;
+}
+//==================================================================================================
+/* RawArray::RawArray(void)
 {
 z=new Raw2D();
 zsize=0;
 }*/
+Raw2D operator/(const PIXTYPE val, const Raw2D& img)
+{
+	Raw2D res(img);
+	for (int i = 0; i < img.size(); ++i)
+		res.data[i] = val/res.data[i];
+	return res;
+}
 
-Raw3D::Raw3D(int zsize,Raw2D *src)
+Raw2DArray::Raw2DArray(int zsize,Raw2D *src)
 {
 	this->zsize=zsize;
 	this->z=src;
 }
-Raw3D::Raw3D(void)
+Raw2DArray::Raw2DArray(void)
 {
 	z=0;
 }
 
-Raw3D::~Raw3D(void){
+Raw2DArray::~Raw2DArray(void){
 	if(this->z!=NULL)
 		delete [] this->z;
 	z=NULL;
-	//cout<<"Raw3D is deconstruct"<<endl;
+	//cout<<"RawArray is deconstruct"<<endl;
 }
 
 //added FOR TEST DATA
@@ -160,7 +176,7 @@ void rawarray(int xsize,int ysize,int const zsize,PIXTYPE *yy)
 
 
 //================================================================================
-//Some helper functions for Raw2D and Raw3D class.
+//Some helper functions for Raw2D and Raw2DArray class.
 //================================================================================
 
 /**
@@ -209,7 +225,7 @@ Sets the size and allocates memory. Discards any existing contents if
 the 3D object is not already 'empty'
 **/
 
-void Raw3D::sizer(int ixsize, int iysize, int izsize) {
+void Raw2DArray::sizer(int ixsize, int iysize, int izsize) {
 	int i;
 	if(z!=NULL)
 		delete[]this->z;
@@ -219,7 +235,7 @@ void Raw3D::sizer(int ixsize, int iysize, int izsize) {
 		z[i].sizer(ixsize,iysize);	// use the Raw2D sizer.	
 }
 
-void Raw3D::sizer(Raw3D* src)
+void Raw2DArray::sizer(Raw2DArray* src)
 {
 	z=src->z;
 	zsize=src->zsize;
@@ -229,7 +245,7 @@ void Raw3D::sizer(Raw3D* src)
 Copy all the pixels from 'src', resizing as needed. Do not change
 name of this object.
 **/ 
-void Raw3D::wipecopy(Raw3D& src) {
+void Raw2DArray::wipecopy(Raw2DArray& src) {
 	int k,kmax;
 
 	if(&src==NULL)return;
@@ -244,10 +260,3 @@ void Raw3D::wipecopy(Raw3D& src) {
 	}
 }
 
-Raw2D operator/(const PIXTYPE val, const Raw2D& img)
-{
-	Raw2D res(img);
-	for (int i = 0; i < img.size(); ++i)
-		res.data[i] = val/res.data[i];
-	return res;
-}

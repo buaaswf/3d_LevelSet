@@ -13,7 +13,7 @@
 //{
 //	Raw2D destImg; 			
 //	Raw2D fTheta; 			//stores Adaptive neighborhood size for each pixel
-//	Raw3D minGradientStack, maxGradientStack; 
+//	RawArray minGradientStack, maxGradientStack; 
 //	Raw2D xGradient, yGradient; 	//X and Y gradients of the input image
 //	Raw2D xSmoothGradient, ySmoothGradient; 	//Bilaterally filtered X and Y gradients of the input image
 //	Filter *filter=new Filter();
@@ -167,8 +167,8 @@
 //Range variance (sigmaR), equation 11.
 //***/
 //
-//PIXTYPE Filter::buildMinMaxImageStack(Raw2D *src,Raw2D* pX, Raw2D* pY, Raw3D* pMinStack,
-//	Raw3D* pMaxStack , int levelMax, PIXTYPE beta)
+//PIXTYPE Filter::buildMinMaxImageStack(Raw2D *src,Raw2D* pX, Raw2D* pY, RawArray* pMinStack,
+//	RawArray* pMaxStack , int levelMax, PIXTYPE beta)
 //{
 //	int imax, jmax, i, j, lev, m, n;
 //	PIXTYPE min, max, minGrad = 1000000.0, maxGrad = -1000000.0, tmp, tmpMin, tmpMax, rangeVariance;
@@ -295,7 +295,7 @@
 //fTheta -- stack level that satisfies equation 10
 //**/
 //
-//void Raw2D::findAdaptiveRegion(Raw3D* pMinStack, Raw3D* pMaxStack, PIXTYPE R, int levelMax)
+//void Raw2D::findAdaptiveRegion(RawArray* pMinStack, RawArray* pMaxStack, PIXTYPE R, int levelMax)
 //{
 //	int imax, jmax,i,j,lev;
 //

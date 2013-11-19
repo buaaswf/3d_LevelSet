@@ -369,7 +369,7 @@ Raw2D* del2(Raw2D *phi)
 {
 	int m=phi->getXsize();
 	int n=phi->getYsize();
-	Raw2D ret2(m,n);
+	Raw2D *ret2=new Raw2D(m,n);
 
 	for (int i=0;i<m;i++)
 	{

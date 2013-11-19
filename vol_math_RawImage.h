@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include<iostream>
 //#include"vol_math_Raw3D_Independt.h"
-#define u_char unsigned char
+//#define u_char unsigned char
 #define PIXTYPE double
 /************************************************************************/
 /* RawImage :three data types to be changed to double 
@@ -21,16 +21,17 @@ public:
 	int width;
 	int height;
 public:
-	u_char * buf;
+	PIXTYPE * buf;
 	RawImage(int length,int height,int width);
+	RawImage(void);
 	int getlength()
 	{
 		return (height*length*width);
 	}
 	~RawImage(void);
-	void readImage( u_char* buf,char const *file ,int size);
+	void readImage( unsigned char * buf,char const *file ,int size);
 	void writeImage(Raw& destImg);
-	float * buf2float(u_char *buf);
+	float * buf2float(unsigned char *buf);
 	void save();
 };
 class Raw  {
@@ -43,7 +44,6 @@ private:   			//-----------------DATA-----------------
 public:				//---------------init fcns-------------
 	Raw(int,int,int,PIXTYPE *);	
 	Raw(const Raw& src);
-	Raw(Raw *src);
 	Raw(int,int,int);
 	Raw(void);// constructor for 'empty' Raws
 	~Raw(void);		// destructor; releases memory
@@ -101,6 +101,7 @@ public:				//---------------init fcns-------------
 		{
 			this->data[i]+= val;
 		}
+		return *this;
 	}
 
 	Raw operator+(const Raw &volume)

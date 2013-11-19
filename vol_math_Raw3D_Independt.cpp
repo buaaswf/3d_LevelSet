@@ -87,13 +87,13 @@ Raw2D operator/(const PIXTYPE val, const Raw2D& img)
 z=new Raw2D();
 zsize=0;
 }*/
-Raw2D operator/(const PIXTYPE val, const Raw2D& img)
-{
-	Raw2D res(img);
-	for (int i = 0; i < img.size(); ++i)
-		res.data[i] = val/res.data[i];
-	return res;
-}
+//Raw2D operator/(const PIXTYPE val, const Raw2D& img)
+//{
+//	Raw2D res(img);
+//	for (int i = 0; i < img.size(); ++i)
+//		res.data[i] = val/res.data[i];
+//	return res;
+//}
 
 Raw2DArray::Raw2DArray(int zsize,Raw2D *src)
 {

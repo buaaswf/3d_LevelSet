@@ -4,9 +4,9 @@
 #include<math.h>
 using namespace cimg_library;
 using namespace std;
-PIXTYPE *p;
-PIXTYPE	*q;
-int i,j,k;
+//PIXTYPE *p;
+//PIXTYPE	*q;
+//int i,j,k;
 Raw del2( Raw &phi ) 
 {
 	int m=phi.getXsize();
@@ -35,6 +35,7 @@ Raw del2( Raw &phi )
 			
 		}
 	}
+	return ret2;
 }
 
 Raw gradientxgc( Raw &g ) 
@@ -42,7 +43,7 @@ Raw gradientxgc( Raw &g )
 	int n=g.getXsize();
 	int m=g.getYsize();
 	int l=g.getZsize();
-	Raw* ret=new Raw(n, m,l);
+	Raw ret(g);
 	int i,j,k,temp1,temp2;
 	for(i=0;i<n;i++)
 	{
@@ -58,7 +59,11 @@ Raw gradientxgc( Raw &g )
 					temp2=j+1;
 				else 
 					temp2=m-1;
-				ret->put(i,j,k,0.5*(g.get(i,temp2,k)-g.get(i,temp1,k)));
+				ret.put(i,j,k,(g.get(i,temp2,k)-g.get(i,temp1,k))/2.0);
+				//if (ret.get(i,j,k)!=0)
+				//{
+				//	cout<<"i="<<i<<",j="<<j<<",k="<<k<<ret.get(i,j,k)<<endl;
+				//}
 			}			
 		}
 	}
@@ -122,14 +127,14 @@ Raw  gradientzgc( Raw &g )
 }
 Raw cos(Raw &x)
 {
-	Raw ret=new Raw(x);
+	Raw ret(x);
 	for (int i=0;i<x.getXsize();i++)
 	{
 		for (int j=0;j< x.getYsize();j++)
 		{
 			for (int k=0;k< x.getZsize();k++)
 			{
-				ret.put(i,j,k,cos(x.get(i,j,k)));
+				ret.put(i,j,k,cos((double)x.get(i,j,k)));
 			}
 		}
 	}
@@ -141,7 +146,7 @@ Raw div(Raw &x,Raw &y,Raw &z)
 }
 void ThreeDim_LevelSet::array_surface(Raw *src)
 {
-	for (i=0;i<src->getZsize();i++)
+	for (int i=0;i<src->getZsize();i++)
 	{
 
 		
@@ -154,9 +159,9 @@ Raw regFunction(Raw &s,double m,double n)
 		z = s.getZsize();
 	Raw ss(x,y,z);
 	PIXTYPE val=0;
-	for (i=0;i<x;i++)
+	for (int i=0;i<x;i++)
 	{
-		for(j=0;j<y;j++)
+		for(int j=0;j<y;j++)
 		{
 			for (int k= 0;k<z;k++)
 			{
@@ -199,8 +204,16 @@ Raw distReg_p2( Raw  &phi )
 {
 	throw std::exception("The method or operation is not implemented.");
 }
-
-void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double mu,double lambda,double alfa,int timestep,int iter,char *potentialFunction,float epsilon )
+void ThreeDim_LevelSet::initialg(Raw &g)
+{
+	Raw gx(gradientxgc(g));
+	Raw gy=gradientygc(g);
+	Raw gz=gradientygc(g);
+	g = (gx)* (gx)+(gy)*(gy)+gz*gz;
+	g = (g)+1.0;
+	g = 1.0/(g);
+}
+void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,double alfa,float epsilon,int timestep,int iter,char *potentialFunction )
 {
 	int m=g.getXsize();
 	int n=g.getYsize();
@@ -208,27 +221,24 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double mu,double lambda,
 	Raw vx=gradientxgc(g);
 	Raw vy=gradientygc(g);
 	Raw vz=gradientzgc(g);
-	//*vx=(*vx);
-	//*vy=(*vy);
-	//*vz=(*vz);
 	Raw diracPhi;
 	Raw areaTerm;
 	Raw volumeTerm;
 	Raw src;
-	Raw distRegTerm = new Raw();
+	Raw distRegTerm;
 	//CImg <double> sourceimage(phi.getXsize(),phi.getYsize(),1,1,0);
 	for(int i=0;i<iter;i++)
 	{
-		NeumannBoundCond(phi);
+		//NeumannBoundCond(phi);
 		Raw phi_x = gradientxgc(phi);
 		Raw phi_y = gradientygc(phi);
 		Raw phi_z = gradientzgc(phi);
 		Raw s = ImageFSqrt(phi_x, phi_y,phi_z);
 		float smallNumber=1e-10;
-		Raw Nx = new Raw(phi_x/(s + smallNumber));
-		Raw Ny = new Raw(phi_y/(s + smallNumber));
-		Raw Nz = new Raw(phi_z/(s + smallNumber));
-		Raw curvature = new Raw(div(Nx,Ny,Nz));
+		Raw Nx(phi_x/(s + smallNumber));
+		Raw Ny(phi_y/(s + smallNumber));
+		Raw Nz(phi_z/(s + smallNumber));
+		Raw curvature(div(Nx,Ny,Nz));
 	
 		char *p1="single_well";
 		if (0 == strcmp(potentialFunction, p1))
@@ -244,13 +254,14 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double mu,double lambda,
 			distRegTerm=distReg_p2(phi);  // compute the distance regularization term in eqaution (13) with the double-well potential p2.
 		}
 		else printf("EEROR");
-		diracPhi=new Raw(Dirac(phi,epsilon));
-		areaTerm=new Raw(( (g) *(diracPhi))); 
-		volumeTerm=new Raw(m,n,l);
+		diracPhi=Dirac(phi,epsilon);
+		volumeTerm= g *diracPhi; 
+		//volumeTerm=Raw(m,n,l);
 		Raw edge1=(diracPhi) * ((vx) * (Nx)+(vy) * (Ny)+(vz)*(Nz));
 		Raw edge2=(diracPhi) * ( (g) * (curvature));
 
 		areaTerm =edge1+edge2;
+		//IShowraw(volumeTerm);
 		phi=phi +((distRegTerm)*mu* double(timestep) +(areaTerm)*lambda + (volumeTerm)*alfa);
 
 
@@ -299,7 +310,7 @@ void ThreeDim_LevelSet::NeumannBoundCond( Raw &img )
 	int nrow=img.getXsize();
 	int ncol=img.getYsize();
 	int ndepth=img.getZsize();
-	int i,j,k;
+	int i=0,j=0,k=0;
 	//the eight point SDF
 	img.putXYZ(0,img.getXYZ(2*ncol+2));
 	img.putXYZ(ncol-1,img.get(2,ncol-3,k));
@@ -341,7 +352,7 @@ Raw ThreeDim_LevelSet::ImageFSqrt( Raw &phi_x, Raw &phi_y,Raw &phi_z )
 		{
 			for ( int k = 0; k< l; k++)
 			{
-				ret.put(i,j,k,sqrt(phi_x.get(i,j,k)*phi_x.get(i,j,k)+phi_y.get(i,j,k)*phi_y.get(i,j,k)+phi_z.get(i,j,k)*phi_z.get(i,j,k)));
+				ret.put(i,j,k,sqrt((double)phi_x.get(i,j,k)*phi_x.get(i,j,k)+phi_y.get(i,j,k)*phi_y.get(i,j,k)+phi_z.get(i,j,k)*phi_z.get(i,j,k)));
 			}
 		}
 	}

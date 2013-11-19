@@ -104,8 +104,8 @@ using namespace std;
 //	//enum PotentialFunction{single_well = 1,double_well};
 //	char const *pt="single_well";
 //	int iter_outer=120;
-//	
+//
 //	ls->drlse_edge(initial,raw2d,5.0,0.2,3,1.5,1,iter_outer,pt);
 //
-//	 system("pause");
+//	system("pause");
 //}

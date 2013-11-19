@@ -4,37 +4,59 @@
 RawImage is to change the all the three data types to double or float
 */
 //=====================================================================================================
+char* double2char(double *buf, long length)
+{
+	int i=0;
+	char *imgf=new char[length];
+	while(i < length)
+	{
+		imgf[i]= (char)buf[i++];
+	}
+	return imgf;
+}
+
 RawImage::RawImage(int length,int height,int width)
 {
 	this->height=height;
 	this->length=length;
 	this->width=width;
 	int length1=this->getlength();
-	this->buf=new u_char[length1];
+	this->buf=new PIXTYPE[length1];
 }
-void RawImage::readImage(u_char* buf,char const *file ,int size)
+RawImage::RawImage()
+{
+	this->height=0;
+	this->length=0;
+	this->width=0;
+	this->buf=NULL;
+
+}
+void RawImage::readImage(unsigned char* buf,char const *file ,int size)
 {
 	FILE * op=fopen(file,"rb");
 	if(op==NULL)
 	{
 		printf("open fail");
 	}
-	fread(buf,sizeof(u_char),size,op);
+	fread(buf,sizeof(unsigned char),size,op);
 	fclose(op);
 	printf("read is ok\n");
 }
 void RawImage::writeImage(Raw &destImg)
 {
-	FILE *p=fopen("F:\\3Dlevel.raw","ab");
-	fwrite(destImg.getdata(),sizeof(PIXTYPE),destImg.getXsize()*destImg.getYsize()*destImg.getZsize(),p);
+	FILE *p=fopen("F:\\3Dlevel.raw","wb");
+	char* data = double2char(destImg.getdata(), destImg.size());
+	//double *data=destImg.getdata();
+	fwrite(data, sizeof(char), destImg.size(), p);
 	fclose(p);
 	fflush(stdout);
 
+	delete[] data;
 	printf("write is ok");
 }
-float* RawImage::buf2float(u_char *buf)
+float* RawImage::buf2float(unsigned char *buf)
 {
-	u_char *p;
+	unsigned char *p;
 	p=buf;
 	int i=0;
 	long length=this->getlength();
@@ -47,6 +69,7 @@ float* RawImage::buf2float(u_char *buf)
 	}
 	return imgf;
 }
+
 RawImage::~RawImage(void)
 {
 	delete[] buf;
@@ -75,22 +98,15 @@ Raw::Raw(int xsize,int ysize,int zsize)
 	this->ysize=ysize;
 	this->zsize=zsize;
 	this->data=new PIXTYPE[size()];
-
 }
-Raw::Raw(Raw*src )
-{
-	this->xsize=xsize;
-	this->ysize=ysize;
-	this->zsize=zsize;
-	memcpy(this->data,src->data,sizeof(PIXTYPE));
 
-}
 Raw::Raw(const Raw & src)
 {
-	this->xsize=xsize;
-	this->ysize=ysize;
-	this->zsize=zsize;
-	memcpy(this->data,src.data,sizeof(PIXTYPE));
+	this->xsize=src.xsize;
+	this->ysize=src.ysize;
+	this->zsize=src.zsize;
+	this->data=new PIXTYPE[size()];
+	memcpy(this->data,src.data,sizeof(PIXTYPE)*size());
 
 }
 
@@ -137,10 +153,11 @@ Raw operator /(const PIXTYPE val, const Raw &volume)
 {
 	Raw res(volume);
 
-	for (int i = 0; i < volume.size(); i ++ )
+	for (int i = 0; i < res.size(); i ++ )
 	{
-		volume.data[i]=val/volume.data[i];
+		res.data[i]=val/volume.data[i];
 	}
+	return res;
 }
 
 //=====================================================================================================

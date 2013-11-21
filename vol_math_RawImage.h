@@ -79,9 +79,9 @@ public:				//---------------init fcns-------------
 		std::swap(this->data,volume.data);
 
 			return volume;
-			//to be implemention
+
 	}
-	Raw& operator=(Raw volume)
+	Raw& operator = (Raw volume)
 	{
 		volume.swap(*this);
 		return *this;
@@ -99,7 +99,7 @@ public:				//---------------init fcns-------------
 	{
 		for (int i = 0; i < size(); ++i)
 		{
-			this->data[i]+= val;
+			this->data[i] += val;
 		}
 		return *this;
 	}
@@ -140,31 +140,31 @@ public:				//---------------init fcns-------------
 		return Raw(*this) -= val;
 
 	}
-	Raw& operator*=(const Raw& img)
+	Raw& operator *=(const Raw& img)
 	{
 		for (int i = 0; i < size(); ++i)
 			this->data[i] *= img.data[i];
 		return *this;
 	}
 
-	Raw& operator*=(const PIXTYPE val)
+	Raw& operator *=(const PIXTYPE val)
 	{
 		for (int i = 0; i < size(); ++i)
 			this->data[i] *= val;
 		return *this;
 	}
 
-	Raw operator*(const Raw& img)
+	Raw operator *(const Raw& img)
 	{
 		return  Raw(*this) *= img;
 	}
 
-	Raw operator*(const PIXTYPE val)
+	Raw operator *(const PIXTYPE val)
 	{
 		return Raw(*this) *= val;
 	}
 
-	Raw& operator/=(const Raw& img)
+	Raw& operator /=(const Raw& img)
 	{
 		for (int i = 0; i < size(); ++i)
 			this->data[i] /= img.data[i];
@@ -178,7 +178,7 @@ public:				//---------------init fcns-------------
 		return *this;
 	}
 
-	Raw operator/(const Raw& img)
+	Raw operator /(const Raw& img)
 	{
 		return Raw(*this) /= img;
 	}

@@ -51,15 +51,15 @@ Raw gradientxgc( Raw &g )
 		{
 			for ( k=0;k < l;k++)
 			{
-				if(j>0)
-					temp1=j-1;
+				if(i>0)
+					temp1=i-1;
 				else
 					temp1=0;
-				if (j<m-1)
-					temp2=j+1;
+				if (i<n-1)
+					temp2=i+1;
 				else 
-					temp2=m-1;
-				ret.put(i,j,k,(g.get(i,temp2,k)-g.get(i,temp1,k))/2.0);
+					temp2=n-1;
+				ret.put(i,j,k,(g.get(temp2,j,k)-g.get(temp1,j,k))/2.0);
 				//if (ret.get(i,j,k)!=0)
 				//{
 				//	cout<<"i="<<i<<",j="<<j<<",k="<<k<<ret.get(i,j,k)<<endl;
@@ -83,15 +83,15 @@ Raw gradientygc( Raw & g )
 		{
 			for ( k = 0;k < l;k++)
 			{
-				if(i>0)
-					temp1=n-1;
+				if(j>0)
+					temp1=j-1;
 				else
 					temp1=0;
-				if (i<n-1)
-					temp2=i+1;
+				if (j<n-1)
+					temp2=j+1;
 				else 
-					temp2=n-1;
-				ret.put(i,j,k,0.5*(g.get(temp2,j,k)-g.get(temp1,j,k)));
+					temp2=m-1;
+				ret.put(i,j,k,0.5*(g.get(i,temp2,k)-g.get(i,temp1,k)));
 			}			
 		}
 	}
@@ -112,7 +112,7 @@ Raw  gradientzgc( Raw &g )
 			for ( k = 0;k < l;k++)
 			{
 				if(k>0)
-					temp1=l-1;
+					temp1=k-1;
 				else
 					temp1=0;
 				if (k<l-1)
@@ -208,7 +208,7 @@ void ThreeDim_LevelSet::initialg(Raw &g)
 {
 	Raw gx(gradientxgc(g));
 	Raw gy=gradientygc(g);
-	Raw gz=gradientygc(g);
+	Raw gz=gradientzgc(g);
 	g = (gx)* (gx)+(gy)*(gy)+gz*gz;
 	g = (g)+1.0;
 	g = 1.0/(g);
@@ -227,9 +227,11 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 	Raw src;
 	Raw distRegTerm;
 	//CImg <double> sourceimage(phi.getXsize(),phi.getYsize(),1,1,0);
+	//CImg <double> sourceimage(phi.getXsize(),phi.getYsize(),phi.getZsize(),1,0);
+	//CImgDisplay disp(256,256,"",1);
 	for(int i=0;i<iter;i++)
 	{
-		//NeumannBoundCond(phi);
+		NeumannBoundCond(phi);
 		Raw phi_x = gradientxgc(phi);
 		Raw phi_y = gradientygc(phi);
 		Raw phi_z = gradientzgc(phi);
@@ -257,28 +259,28 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 		diracPhi=Dirac(phi,epsilon);
 		volumeTerm= g *diracPhi; 
 		//volumeTerm=Raw(m,n,l);
-		Raw edge1=(diracPhi) * ((vx) * (Nx)+(vy) * (Ny)+(vz)*(Nz));
+		Raw edge1=(diracPhi) * ((vx) * (Nx)+(vy) * (Ny)+(vz) * (Nz));
 		Raw edge2=(diracPhi) * ( (g) * (curvature));
 
 		areaTerm =edge1+edge2;
 		//IShowraw(volumeTerm);
 		phi=phi +((distRegTerm)*mu* double(timestep) +(areaTerm)*lambda + (volumeTerm)*alfa);
+		cout<<"iterator i="<<i<<endl;
 
+		//cimg_for_insideXYZ(sourceimage,x,y,z,0)
+		//{
+		//	PIXTYPE val=phi.get(x,y,z);
+		//	if (val>0&&val<1)
+		//	{
+		//		sourceimage(x,y,z,0)=(double)(val);
+		//	}
+		//	else if (val>=1)
+		//	{
+		//		sourceimage(x,y,z,0)=(double)(1);
+		//	}
 
-	//cimg_for_insideXY(sourceimage,x,y,0)
-	//{
-	//	PIXTYPE val=phi->get(x,y,z);
-	//	if (val>0&&val<1)
-	//	{
-	//		sourceimage(x,y,0)=(double)(val);
-	//	}
-	//	else if (val>=1)
-	//	{
-	//		sourceimage(x,y,0)=(double)(1);
-	//}
-
-	//}
-		//sourceimage.display(disp.wait(20));
+		//}
+		//sourceimage.display(disp.wait(200));
 		/*delete phi_x;
 		delete phi_y;
 		delete phi_z;*/
@@ -312,30 +314,79 @@ void ThreeDim_LevelSet::NeumannBoundCond( Raw &img )
 	int ndepth=img.getZsize();
 	int i=0,j=0,k=0;
 	//the eight point SDF
-	img.putXYZ(0,img.getXYZ(2*ncol+2));
-	img.putXYZ(ncol-1,img.get(2,ncol-3,k));
-	img.putXYZ((nrow-1)*ncol,img.getXYZ((nrow-3)*ncol+2));
-	img.putXYZ(nrow*ncol-1,img.get(nrow-3,ncol-3,ndepth-3));
+	img.put(0,0,0,img.get(3,3,3));
+	img.put(nrow-1,0,0,img.get(nrow-3,3,3));
+	img.put(0,ncol-1,0,img.get(3,ncol-3,3));
+	img.put(0,0,ndepth-1,img.get(3,3,ndepth-3));
+	img.put(nrow-1,ncol-1,0,img.get(nrow-3,ncol-3,3));
+	img.put(nrow-1,0,ndepth-1,img.get(nrow-3,3,ndepth-3));
+	img.put(0,ncol-1,ndepth-1,img.get(3,ncol-3,ndepth-3));
+	img.put(nrow-1,ncol-1,ndepth-1,img.get(nrow-3,ncol-3,ndepth-3));
 	//first and the last column SDF
 	for(i=2;i<nrow-2;i++)
 	{
-		img.putXYZ((i-1)*ncol,img.getXYZ((i-1)*ncol+2));
-		img.putXYZ(ncol*(i-1)+ncol-1,img.getXYZ(ncol*(i-1)-3));
-
+		img.put(i,0,0,img.get(i,3,3));
+		img.put(i,ncol-1,0,img.get(i,ncol-3,3));
+		img.put(i,ncol-1,ndepth-1,img.get(i,ncol-3,ndepth-3));
+		img.put(i,0,ndepth-1,img.get(i,3,ndepth-3));
 	}
 	//first and last row SDF
 	for(j=2;j<ncol-2;j++)
 	{
-		img.putXYZ(j,img.getXYZ(2*ncol+j));
-		img.putXYZ(ncol*(nrow-2)+j,img.getXYZ(ncol*(nrow-4)+j));
+		img.put(0,j,0,img.get(3,j,3));
+		img.put(0,j,ndepth-1,img.get(3,j,ndepth-3));
+		img.put(nrow-1,j,0,img.get(nrow-3,j,3));
+		img.put(nrow-1,j,ndepth-1,img.get(nrow-3,j,ndepth-3));
 	}
-	for (i=0;i<nrow;i++)
+	//first and last depth SDF
+	for(k=2;k<ndepth-2;k++)
 	{
-		for(j=0;j<ncol;j++)
-		{
-			img.put(i,j,k,img.get(i,j,k));
-		}
+		img.put(0,0,k,img.get(3,3,k));
+		img.put(nrow-1,0,k,img.get(nrow-3,3,k));
+		img.put(0,ncol-1,k,img.get(3,ncol-3,k));
+		img.put(nrow-1,ncol-1,k,img.get(nrow-3,ncol-3,k));
 	}
+	//front and back surface SDF
+	for(i=2;i<nrow-2;i++)
+	{
+		for (k=2;j<ndepth-2;k++)
+		{
+			img.put(i,0,k,img.get(i,j,3));
+			img.put(i,ncol-1,k,img.get(i,j,ndepth-3));
+
+		}
+
+	}
+	//up and below surface SDF
+	for(i=2;i<nrow-2;i++)
+	{
+		for (j=2;j<ncol-2;j++)
+		{
+			img.put(i,j,0,img.get(i,j,3));
+			img.put(i,j,ndepth-1,img.get(i,j,ndepth-3));
+
+		}
+
+	}
+	//left and right surface SDF
+	for(j=2;j<ncol-2;j++)
+	{
+		for (k=2;k<ndepth-2;k++)
+		{
+			img.put(0,j,k,img.get(3,j,k));
+			img.put(nrow-1,j,k,img.get(nrow-3,j,k));
+
+		}
+
+	}
+
+	//for (i=0;i<nrow;i++)
+	//{
+	//	for(j=0;j<ncol;j++)
+	//	{
+	//		img.put(i,j,k,img.get(i,j,k));
+	//	}
+	//}
 	
 }
 

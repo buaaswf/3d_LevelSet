@@ -585,9 +585,9 @@ void LevelSet::drlse_edge(Raw2D *phi,Raw2D *g,float lambda,float mu,float alfa,f
 		else if (val>=1)
 		{
 			sourceimage(x,y,0)=(double)(1);
-	}
+		}
 
-	}
+		}
 		sourceimage.display(disp.wait(20));
 		delete phi_x;
 		delete phi_y;
@@ -596,7 +596,7 @@ void LevelSet::drlse_edge(Raw2D *phi,Raw2D *g,float lambda,float mu,float alfa,f
 	//IShowImg(*edgeTerm);
 	//IShowImg(*areaTerm);
 	//initialg(phi);
-	IShowImg(*phi);
+	//IShowImg(*phi);
 	//IShowImg(*distRegTerm);
 	delete vx;
 	delete vy;

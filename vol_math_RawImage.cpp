@@ -31,14 +31,16 @@ RawImage::RawImage()
 	this->buf=NULL;
 
 }
-void RawImage::readImage(unsigned char* buf,char const *file ,int size)
+void RawImage::readImage(unsigned char * buf,char const *file ,int size)
 {
 	FILE * op=fopen(file,"rb");
 	if(op==NULL)
 	{
 		printf("open fail");
 	}
+	//unsigned char * unsignedbuf=new unsigned char[size];
 	fread(buf,sizeof(unsigned char),size,op);
+
 	fclose(op);
 	printf("read is ok\n");
 }
@@ -155,7 +157,7 @@ Raw operator /(const PIXTYPE val, const Raw &volume)
 
 	for (int i = 0; i < res.size(); i ++ )
 	{
-		res.data[i]=val/volume.data[i];
+		res.data[i]= val/volume.data[i];
 	}
 	return res;
 }

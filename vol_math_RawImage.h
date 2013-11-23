@@ -5,7 +5,7 @@
 #include<iostream>
 //#include"vol_math_Raw3D_Independt.h"
 //#define u_char unsigned char
-#define PIXTYPE double
+#define PIXTYPE float
 /************************************************************************/
 /* RawImage :three data types to be changed to double 
 Raw:volume class
@@ -30,6 +30,7 @@ public:
 	}
 	~RawImage(void);
 	void readImage( unsigned char * buf,char const *file ,int size);
+	void readImagesi(signed int  * buf,char const *file ,int size);
 	void writeImage(Raw& destImg);
 	float * buf2float(unsigned char *buf);
 	void save();

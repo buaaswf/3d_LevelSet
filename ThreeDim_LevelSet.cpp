@@ -22,8 +22,6 @@ Raw del2( Raw &phi )
 				if (i+1< m && j+1< n &&k+1< l && i-1>=0 && j-1 >= 0 && k-1>= 0)
 				{
 					PIXTYPE value = (1.0/6.0)*(phi.get(i+1, j, k) + phi.get(i-1, j, k) + phi.get(i, j-1, k) + phi.get(i, j+1, k) + phi.get(i,j,k+1)+phi.get(i,j,k-1)- 6*(phi.get(i,j,k)));
-					//if(value!=0)
-					//	cout<<value<<endl;
 					ret2.put(i, j,k, (PIXTYPE)value);
 				}
 				else 
@@ -190,7 +188,7 @@ Raw  Dirac( Raw & x, double sigma )
 {
 	Raw ret(x);
 	PIXTYPE temp=((1.0/2.0)/sigma);
-	double temp2=(cos((2/sigma)*pi)+1)*temp;
+	//double temp2=(cos((2/sigma)*pi)+1)*temp;
 	Raw f= (cos((ret/sigma)*pi)+1)*temp;
 	Raw b = regFunction(ret, -sigma, sigma);
 	//IShowImg(b);
@@ -226,6 +224,7 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 	Raw volumeTerm;
 	Raw src;
 	Raw distRegTerm;
+	//Raw curvature;
 	//CImg <double> sourceimage(phi.getXsize(),phi.getYsize(),1,1,0);
 	//CImg <double> sourceimage(phi.getXsize(),phi.getYsize(),phi.getZsize(),1,0);
 	//CImgDisplay disp(256,256,"",1);
@@ -240,7 +239,7 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 		Raw Nx(phi_x/(s + smallNumber));
 		Raw Ny(phi_y/(s + smallNumber));
 		Raw Nz(phi_z/(s + smallNumber));
-		Raw curvature(div(Nx,Ny,Nz));
+		Raw curvature=(div(Nx,Ny,Nz));
 	
 		char *p1="single_well";
 		if (0 == strcmp(potentialFunction, p1))
@@ -263,9 +262,16 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 		Raw edge2=(diracPhi) * ( (g) * (curvature));
 
 		areaTerm =edge1+edge2;
-		//IShowraw(volumeTerm);
+		//IShowraw(volumeTerm,1,&p1);
 		phi=phi +((distRegTerm)*mu* double(timestep) +(areaTerm)*lambda + (volumeTerm)*alfa);
+		//IShowraw(phi,1,&potentialFunction);
 		cout<<"iterator i="<<i<<endl;
+		//if (i==iter-1)
+		//{
+		//	IShowraw(distRegTerm,1,&potentialFunction);
+		//	//IShowraw(g,1,&potentialFunction);
+		//}
+
 
 		//cimg_for_insideXYZ(sourceimage,x,y,z,0)
 		//{
@@ -286,11 +292,11 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 		delete phi_z;*/
 	}	
 	//IShowImg(*diracPhi);
-	//IShowImg(*edgeTerm);
+	//IShowraw(areaTerm,1,&potentialFunction);
 	//IShowImg(*areaTerm);
 	//initialg(phi);
 	//IShowImg(*phi);
-	//IShowImg(*distRegTerm);
+	//IShowraw(curvature,1,&potentialFunction);
 	//delete vx;
 	//delete vy;
 	//delete vz;

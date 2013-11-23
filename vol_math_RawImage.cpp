@@ -4,7 +4,7 @@
 RawImage is to change the all the three data types to double or float
 */
 //=====================================================================================================
-char* double2char(double *buf, long length)
+char* double2char(float *buf, long length)
 {
 	int i=0;
 	char *imgf=new char[length];
@@ -40,6 +40,20 @@ void RawImage::readImage(unsigned char * buf,char const *file ,int size)
 	}
 	//unsigned char * unsignedbuf=new unsigned char[size];
 	fread(buf,sizeof(unsigned char),size,op);
+
+	fclose(op);
+	printf("read is ok\n");
+}
+void RawImage::readImagesi(signed int  * buf,char const *file ,int size)
+{
+	FILE * op=fopen(file,"rb");
+	if(op==NULL)
+	{
+		printf("open fail");
+	}
+	//unsigned char * unsignedbuf=new unsigned char[size];
+	fseek(op,24L,SEEK_SET);
+	fread(buf,sizeof(signed int ),size,op);
 
 	fclose(op);
 	printf("read is ok\n");

@@ -86,14 +86,14 @@ static void IShowraw (Raw& raw,int argc,char **argv)
 	cimg_for_insideXYZ(sourceimage,x,y,z,0)
 	{
 		PIXTYPE val=raw.get(x,y,z);
-		//if (val<1&&val>0)
-		//{
+		if (val<1&&val>0)
+		{
 			sourceimage(x,y,z,0)=(double)(val);
-		//}
-		//else if (val>=1)
-		//{
-			//sourceimage(x,y,z,0)=(double)(1);
-		//}
+		}
+		else if (val>=1)
+		{
+			sourceimage(x,y,z,0)=(double)(1);
+		}
 		
 	}
 	sourceimage.display("hello");

@@ -1,4 +1,6 @@
 #include "vol_math_RawImage.h"
+#include <cassert>
+
 //#include"vol_math_Raw3D_Independt.h"
 /*
 RawImage is to change the all the three data types to double or float
@@ -44,7 +46,28 @@ void RawImage::readImage(unsigned char * buf,char const *file ,int size)
 	fclose(op);
 	printf("read is ok\n");
 }
-void RawImage::readImagesi(signed int  * buf,char const *file ,int size)
+void RawImage::readStream(short* buf,char const *filename,int size)
+{
+	int lx=0,ly=0,lz=0;
+	ifstream file;
+	file.open(filename, ios::out | ios::app | ios::binary);
+	if (!file.is_open()) {
+		cout<< "The file open failed, Please check it and try again"<< endl;
+		exit(0);
+	}
+	file.read(reinterpret_cast<char *>(&lx),sizeof(int));
+	file.read(reinterpret_cast<char *>(&ly),sizeof(int));
+	file.read(reinterpret_cast<char *>(&lz),sizeof(int));
+	cout<<sizeof(int)<<endl;
+	cout<<sizeof(short)<<endl;
+	cout<<"lx="<<lx<<",ly="<<ly<<",lz="<<lz<<endl;
+	file.seekg(24L+512*512*345*sizeof(short),ios::beg);
+	file.read((char *)buf,size);
+	file.close();
+
+
+}
+void RawImage::readImagesi(short  * buf,char const *file ,int size)
 {
 	FILE * op=fopen(file,"rb");
 	if(op==NULL)
@@ -52,8 +75,8 @@ void RawImage::readImagesi(signed int  * buf,char const *file ,int size)
 		printf("open fail");
 	}
 	//unsigned char * unsignedbuf=new unsigned char[size];
-	fseek(op,24L,SEEK_SET);
-	fread(buf,sizeof(signed int ),size,op);
+	fseek(op,24L+43253760L,SEEK_SET);
+	fread((char *)buf,sizeof(signed int ),size,op);
 
 	fclose(op);
 	printf("read is ok\n");
@@ -98,41 +121,56 @@ Raw::Raw(void)
 	xsize=0;
 	ysize=0;
 	zsize=0;
+	is_shared = false;
 	data=NULL;
 }
-Raw::Raw(int xsize,int ysize,int zsize,PIXTYPE *y)
+Raw::Raw(int xsize,int ysize,int zsize,PIXTYPE *y,bool _is_shared)
 {
 	//float i=0.0f;
 	this->xsize=xsize;
 	this->ysize=ysize;
 	this->zsize=zsize;
+	is_shared = _is_shared;
 	this->data=y;
 }
-Raw::Raw(int xsize,int ysize,int zsize)
+Raw::Raw(int xsize,int ysize,int zsize,bool _is_shared)
 {
 	this->xsize=xsize;
 	this->ysize=ysize;
 	this->zsize=zsize;
+	this->is_shared = _is_shared;
 	this->data=new PIXTYPE[size()];
 }
 
-Raw::Raw(const Raw & src)
+Raw::Raw(const Raw & src, bool _is_shared)
 {
 	this->xsize=src.xsize;
 	this->ysize=src.ysize;
 	this->zsize=src.zsize;
-	this->data=new PIXTYPE[size()];
-	memcpy(this->data,src.data,sizeof(PIXTYPE)*size());
+	this->is_shared = _is_shared;
 
+	if (src.is_shared == true) {
+		this->data = src.data;
+	} else {
+		this->data=new PIXTYPE[size()];
+		memcpy(this->data,src.data,sizeof(PIXTYPE)*size());
+	}
 }
 
 Raw::~Raw(void)
 {
-	if(this->data!=NULL)
+	if(this->is_shared == false && this->data!=NULL) {
 		delete [] this->data;
-	data=NULL;
-	//cout<<"Raw is deconstruct"<<endl;
+		data=NULL;
+	}
 }
+
+Raw& Raw::set_shared(bool _is_shared)
+{
+	this->is_shared = _is_shared;
+	return *this;
+}
+
 void Raw::sizer(int ixsize, int iysize,int izsize) {
 	if(data!=NULL)
 		delete [] this->data;
@@ -142,6 +180,7 @@ void Raw::sizer(int ixsize, int iysize,int izsize) {
 	ysize = iysize;
 	zsize=izsize;
 }
+
 void Raw::sizer(Raw* src) {
 	int ix, iy,iz;
 
@@ -150,6 +189,7 @@ void Raw::sizer(Raw* src) {
 	iz = src->getZsize();
 	sizer(ix,iy,iz);
 }
+
 int Raw::wipecopy(Raw* src) {
 	int out=1;
 	int i,imax;	
@@ -165,6 +205,7 @@ int Raw::wipecopy(Raw* src) {
 
 	return(out);
 }
+
 Raw operator /(const PIXTYPE val, const Raw &volume)
 {
 	Raw res(volume);
@@ -173,7 +214,9 @@ Raw operator /(const PIXTYPE val, const Raw &volume)
 	{
 		res.data[i]= val/volume.data[i];
 	}
-	return res;
+
+
+	return res.set_shared(true);
 }
 
 //=====================================================================================================

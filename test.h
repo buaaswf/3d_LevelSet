@@ -41,7 +41,7 @@ static void Ishowsurface(CImg<double> & img, int argc,char **argv)
 	const CImgList<> opacities0(faces0.size(),1,1,1,1,0.2f);
 
 	// Perform MCF evolution.
-	CImgDisplay disp(256,256,0,1), disp3d(512,512,0,0);
+	CImgDisplay disp(512,512,0,1), disp3d(512,512,0,0);
 	float alpha = 0, beta = 0;
 	CImgList<unsigned char> colors(faces.size(),CImg<unsigned char>::vector(200,128,100));
 	CImgList<> opacities(faces.size(),CImg<>::vector(1.0f));

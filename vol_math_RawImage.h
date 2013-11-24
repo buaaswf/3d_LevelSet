@@ -3,9 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include<iostream>
+#include <fstream>
+
 //#include"vol_math_Raw3D_Independt.h"
 //#define u_char unsigned char
 #define PIXTYPE float
+using namespace std;
 /************************************************************************/
 /* RawImage :three data types to be changed to double 
 Raw:volume class
@@ -30,7 +33,8 @@ public:
 	}
 	~RawImage(void);
 	void readImage( unsigned char * buf,char const *file ,int size);
-	void readImagesi(signed int  * buf,char const *file ,int size);
+	void readImagesi(short  * buf,char const *file ,int size);
+	void readStream(short *buf,char const *file,int size);
 	void writeImage(Raw& destImg);
 	float * buf2float(unsigned char *buf);
 	void save();
@@ -41,13 +45,16 @@ private:   			//-----------------DATA-----------------
 	int ysize;		// # of scanlines in this Raw.
 	int zsize;
 	PIXTYPE *data;		// 1D array of PIXTYPE that are accessed as a 2D array.
-
+	bool is_shared;
 public:				//---------------init fcns-------------
-	Raw(int,int,int,PIXTYPE *);	
-	Raw(const Raw& src);
-	Raw(int,int,int);
+	Raw(int,int,int,PIXTYPE*,bool=false);	
+	Raw(const Raw& src,bool=false);
+	Raw(int,int,int,bool=false);
 	Raw(void);// constructor for 'empty' Raws
 	~Raw(void);		// destructor; releases memory
+
+	Raw& set_shared(bool);
+
 	void sizer(int ixsize, int iysize,int izsize);		// get mem for rectangle of pixels
 	void sizer(Raw* src);					// get same amt. of mem as 'src'
 	int getXsize(void) {return xsize;};		// get # pixels per scanline
@@ -71,23 +78,20 @@ public:				//---------------init fcns-------------
 		data[ixyz] = val;
 	};
 
-
-	Raw & swap(Raw & volume)
+	inline void swap(Raw & volume)
 	{
 		std::swap(this->xsize,volume.xsize);
 		std::swap(this->ysize,volume.ysize);
 		std::swap(this->zsize,volume.zsize);
 		std::swap(this->data,volume.data);
-
-			return volume;
-
 	}
-	Raw& operator = (Raw volume)
+
+	inline Raw& operator = (Raw volume)
 	{
 		volume.swap(*this);
 		return *this;
-
 	}
+
 	Raw& operator+=(const Raw &volume)
 	{
 		for (int i = 0; i<size(); ++i)
@@ -96,6 +100,7 @@ public:				//---------------init fcns-------------
 		}
 		return *this;
 	}
+	
 	Raw& operator+=(const PIXTYPE val)
 	{
 		for (int i = 0; i < size(); ++i)
@@ -107,12 +112,11 @@ public:				//---------------init fcns-------------
 
 	Raw operator+(const Raw &volume)
 	{
-		//return(*this+=volume);
-		return Raw(*this) +=volume;
+		return Raw(*this, true) += volume;
 	}
 	Raw operator+(const PIXTYPE val)
 	{
-		return Raw(*this) += val;
+		return Raw(*this, true) += val;
 
 	}
 	Raw& operator-=(const Raw &volume)
@@ -133,12 +137,12 @@ public:				//---------------init fcns-------------
 	}
 	Raw operator -(const Raw &volume)
 	{
-		return Raw(*this) -= volume;
+		return Raw(*this, true) -= volume;
 	
 	}
 	Raw operator -(const PIXTYPE val)
 	{
-		return Raw(*this) -= val;
+		return Raw(*this, true) -= val;
 
 	}
 	Raw& operator *=(const Raw& img)
@@ -157,12 +161,12 @@ public:				//---------------init fcns-------------
 
 	Raw operator *(const Raw& img)
 	{
-		return  Raw(*this) *= img;
+		return  Raw(*this, true) *= img;
 	}
 
 	Raw operator *(const PIXTYPE val)
 	{
-		return Raw(*this) *= val;
+		return Raw(*this, true) *= val;
 	}
 
 	Raw& operator /=(const Raw& img)
@@ -181,28 +185,15 @@ public:				//---------------init fcns-------------
 
 	Raw operator /(const Raw& img)
 	{
-		return Raw(*this) /= img;
+		return Raw(*this, true) /= img;
 	}
 
 	Raw operator/(const PIXTYPE val)
 	{
-		return Raw(*this) /= val;
+		return Raw(*this, true) /= val;
 	}
 
 	friend Raw operator/(const PIXTYPE val, const Raw& volume);
-
-
-
-
-
-
-
-
-
-
-
-
-
 };
 
 

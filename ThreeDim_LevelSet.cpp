@@ -33,7 +33,8 @@ Raw del2( Raw &phi )
 			
 		}
 	}
-	return ret2;
+
+	return ret2.set_shared(true);
 }
 
 Raw gradientxgc( Raw &g ) 
@@ -65,7 +66,7 @@ Raw gradientxgc( Raw &g )
 			}			
 		}
 	}
-	return ret;
+	return ret.set_shared(true);
 }
 
 Raw gradientygc( Raw & g ) 
@@ -93,7 +94,7 @@ Raw gradientygc( Raw & g )
 			}			
 		}
 	}
-	return ret;
+	return ret.set_shared(true);
 	
 }
 Raw  gradientzgc( Raw &g ) 
@@ -121,7 +122,7 @@ Raw  gradientzgc( Raw &g )
 			}			
 		}
 	}
-	return ret;
+	return ret.set_shared(true);
 }
 Raw cos(Raw &x)
 {
@@ -136,11 +137,11 @@ Raw cos(Raw &x)
 			}
 		}
 	}
-	return ret;
+	return ret.set_shared(true);
 }
 Raw div(Raw &x,Raw &y,Raw &z)
 {
-	return gradientxgc(x)+gradientygc(y)+gradientzgc(z);
+	return (gradientxgc(x) += gradientygc(y) += gradientzgc(z)).set_shared(true);
 }
 void ThreeDim_LevelSet::array_surface(Raw *src)
 {
@@ -182,7 +183,7 @@ Raw regFunction(Raw &s,double m,double n)
 		}
 	}
 
-	return ss;
+	return ss.set_shared(true);
 }
 Raw  Dirac( Raw & x, double sigma ) 
 {
@@ -195,7 +196,7 @@ Raw  Dirac( Raw & x, double sigma )
 	ret = f*b;
 	//IShowImg(ret);
 
-	return ret;
+	return ret.set_shared(true);
 }
 
 Raw distReg_p2( Raw  &phi ) 
@@ -204,12 +205,15 @@ Raw distReg_p2( Raw  &phi )
 }
 void ThreeDim_LevelSet::initialg(Raw &g)
 {
-	Raw gx(gradientxgc(g));
+	Raw gx=gradientxgc(g);
 	Raw gy=gradientygc(g);
 	Raw gz=gradientzgc(g);
-	g = (gx)* (gx)+(gy)*(gy)+gz*gz;
-	g = (g)+1.0;
-	g = 1.0/(g);
+	gx*=gx;
+	gy*=gy;
+	gz*=gz;
+	gx+= gy += gz;
+	gx += 1.0;
+	g = 1.0/(gx);
 }
 void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,double alfa,float epsilon,int timestep,int iter,char *potentialFunction )
 {
@@ -219,51 +223,58 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 	Raw vx=gradientxgc(g);
 	Raw vy=gradientygc(g);
 	Raw vz=gradientzgc(g);
-	Raw diracPhi;
-	Raw areaTerm;
-	Raw volumeTerm;
-	Raw src;
-	Raw distRegTerm;
+
 	//Raw curvature;
 	//CImg <double> sourceimage(phi.getXsize(),phi.getYsize(),1,1,0);
 	//CImg <double> sourceimage(phi.getXsize(),phi.getYsize(),phi.getZsize(),1,0);
 	//CImgDisplay disp(256,256,"",1);
 	for(int i=0;i<iter;i++)
 	{
+		float smallNumber=1e-10;
+
 		NeumannBoundCond(phi);
 		Raw phi_x = gradientxgc(phi);
 		Raw phi_y = gradientygc(phi);
 		Raw phi_z = gradientzgc(phi);
-		Raw s = ImageFSqrt(phi_x, phi_y,phi_z);
-		float smallNumber=1e-10;
-		Raw Nx(phi_x/(s + smallNumber));
-		Raw Ny(phi_y/(s + smallNumber));
-		Raw Nz(phi_z/(s + smallNumber));
-		Raw curvature=(div(Nx,Ny,Nz));
+		Raw s = ImageFSqrt(phi_x, phi_y, phi_z) += smallNumber;
+
+		phi_x /= s;
+		phi_y /= s;
+		phi_z /= s;
+
+		s.~Raw();
+
+		Raw curvature = div(phi_x, phi_y, phi_z);
 	
 		char *p1="single_well";
+		Raw distRegTerm;
 		if (0 == strcmp(potentialFunction, p1))
 		{
 			/*
-			 compute distance regularization term in equation (13) 
-			 with the single-well potential p1.
-			 */
-		distRegTerm= ((del2(phi))*6.0 - (curvature));
+			compute distance regularization term in equation (13) 
+			with the single-well potential p1.
+			*/
+			distRegTerm = (del2(phi) *= 6.0) -= curvature;
+		} else if (0 == strcmp(potentialFunction, "double_well")) {
+			distRegTerm = distReg_p2(phi);  // compute the distance regularization term in eqaution (13) with the double-well potential p2.
+		} else {
+			cout << "EEROR" << endl;
 		}
-		else if (0 == strcmp(potentialFunction, "double_well"))
-		{
-			distRegTerm=distReg_p2(phi);  // compute the distance regularization term in eqaution (13) with the double-well potential p2.
-		}
-		else printf("EEROR");
-		diracPhi=Dirac(phi,epsilon);
-		volumeTerm= g *diracPhi; 
-		//volumeTerm=Raw(m,n,l);
-		Raw edge1=(diracPhi) * ((vx) * (Nx)+(vy) * (Ny)+(vz) * (Nz));
-		Raw edge2=(diracPhi) * ( (g) * (curvature));
 
-		areaTerm =edge1+edge2;
+		phi_x *= vx;
+		phi_y *= vy;
+		phi_z *= vz;
+
+
+		phi_x += phi_y += phi_z += g*curvature;
+		phi_x *= lambda;
+		phi_x += g*alfa;
+		phi_x *= Dirac(phi,epsilon);
+
+		phi += (distRegTerm)*mu*((double)timestep);
+		phi += phi_x;
 		//IShowraw(volumeTerm,1,&p1);
-		phi=phi +((distRegTerm)*mu* double(timestep) +(areaTerm)*lambda + (volumeTerm)*alfa);
+		//phi=phi +(distRegTerm)*mu* double(timestep) +(areaTerm)*lambda + (volumeTerm)*alfa;
 		//IShowraw(phi,1,&potentialFunction);
 		cout<<"iterator i="<<i<<endl;
 		//if (i==iter-1)
@@ -393,7 +404,6 @@ void ThreeDim_LevelSet::NeumannBoundCond( Raw &img )
 	//		img.put(i,j,k,img.get(i,j,k));
 	//	}
 	//}
-	
 }
 
 Raw ThreeDim_LevelSet::ImageFSqrt( Raw &phi_x, Raw &phi_y,Raw &phi_z )
@@ -413,5 +423,6 @@ Raw ThreeDim_LevelSet::ImageFSqrt( Raw &phi_x, Raw &phi_y,Raw &phi_z )
 			}
 		}
 	}
-	return ret;
+
+	return ret.set_shared(true);
 }

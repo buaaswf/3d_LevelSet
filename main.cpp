@@ -13,7 +13,7 @@ using namespace std;
 void testcolon(int argc,char **argv)
 {
 	char *pt="single_well";
-	int l=512,m=512,n=60,l1=0,l2=0,iter_outer=50;
+	int l=512,m=512,n=60,l1=0,l2=0,iter_outer=5;
 	//int LX=0,LY=0,LZ=0;
 	
 	RawImage test;

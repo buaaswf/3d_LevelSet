@@ -273,6 +273,10 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 
 		phi += (distRegTerm)*mu*((double)timestep);
 		phi += phi_x;
+		if (i=iter-1)
+		{
+			phi +=distRegTerm;
+		}
 		//IShowraw(volumeTerm,1,&p1);
 		//phi=phi +(distRegTerm)*mu* double(timestep) +(areaTerm)*lambda + (volumeTerm)*alfa;
 		//IShowraw(phi,1,&potentialFunction);

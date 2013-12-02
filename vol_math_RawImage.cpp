@@ -41,6 +41,7 @@ void RawImage::readImage(unsigned char * buf,char const *file ,int size)
 		printf("open fail");
 	}
 	//unsigned char * unsignedbuf=new unsigned char[size];
+	fseek(op,281*481*500L,SEEK_SET);
 	fread(buf,sizeof(unsigned char),size,op);
 
 	fclose(op);
@@ -58,9 +59,9 @@ void RawImage::readStream(short* buf,char const *filename,int size)
 	file.read(reinterpret_cast<char *>(&lx),sizeof(int));
 	file.read(reinterpret_cast<char *>(&ly),sizeof(int));
 	file.read(reinterpret_cast<char *>(&lz),sizeof(int));
-	cout<<sizeof(int)<<endl;
-	cout<<sizeof(short)<<endl;
-	cout<<"lx="<<lx<<",ly="<<ly<<",lz="<<lz<<endl;
+	//cout<<sizeof(int)<<endl;
+	//cout<<sizeof(short)<<endl;
+	//cout<<"lx="<<lx<<",ly="<<ly<<",lz="<<lz<<endl;
 	file.seekg(24L+512*512*345*sizeof(short),ios::beg);
 	file.read((char *)buf,size);
 	file.close();
@@ -81,12 +82,97 @@ void RawImage::readImagesi(short  * buf,char const *file ,int size)
 	fclose(op);
 	printf("read is ok\n");
 }
+void RawImage::writeImagecolon(Raw &destImg)
+{
+	FILE *p=fopen("F:\\3Dlevel.raw","wb");
+	//char* data = double2char(destImg.getdata(), destImg.size());
+	PIXTYPE *data=destImg.getdata();
+	//for (int i=0;i<destImg.getXsize()*destImg.getYsize()*destImg.getZsize();i++)
+	//{
+
+	//	if (data[i]<1)
+	//	{
+	//		data[i]=data[i];
+	//	}
+	//	else data[i]=0;
+
+	//}
+	for (int i=0;i<destImg.getZsize();i++)
+	{
+		for (int j=0;j<destImg.getYsize();j++)
+		{
+			for (int k=0;k<destImg.getXsize();k++)
+			{
+				PIXTYPE *val=&data[i*destImg.getXsize()*destImg.getYsize()+j*destImg.getXsize()+k];
+				if(k<451 &&k> 45 && j>162 &&j <391)
+				{
+					if (*val>1)
+					{
+						*val=0;
+						
+					}
+					else *val=100;
+				}
+				else *val=0;
+			}
+		}
+	}
+	fwrite(data, sizeof(float), destImg.size(), p);
+	fclose(p);
+	fflush(stdout);
+
+	delete[] data;
+	printf("write is ok");
+}
 void RawImage::writeImage(Raw &destImg)
 {
 	FILE *p=fopen("F:\\3Dlevel.raw","wb");
-	char* data = double2char(destImg.getdata(), destImg.size());
-	//double *data=destImg.getdata();
-	fwrite(data, sizeof(char), destImg.size(), p);
+	//char* data = double2char(destImg.getdata(), destImg.size());
+	PIXTYPE *data=(PIXTYPE *)destImg.getdata();
+	//for (int i=0;i<destImg.getXsize()*destImg.getYsize()*destImg.getZsize();i++)
+	//{
+
+	//	if (data[i]<1)
+	//	{
+	//		data[i]=data[i];
+	//	}
+	//	else data[i]=0;
+
+	//}
+	/*for (int i=0;i<destImg.getZsize();i++)
+	{
+		for (int j=0;j<destImg.getYsize();j++)
+		{
+			for (int k=0;k<destImg.getXsize();k++)
+			{
+				PIXTYPE *val=&data[i*destImg.getXsize()*destImg.getYsize()+j*destImg.getXsize()+k];
+				if(k<451 &&k> 45 && j>162 &&j <391)
+				{
+					if (*val>1)
+					{
+						*val=0;
+
+					}
+					else *val=100;
+				}
+				else *val=0;
+			}
+		}
+	}*/
+	fwrite(data, sizeof(PIXTYPE), destImg.size(), p);
+	fclose(p);
+	fflush(stdout);
+
+	delete[] data;
+	printf("write is ok");
+}
+void RawImage::writeImagesesmic(Raw &destImg)
+{
+	FILE *p=fopen("F:\\3Dlevel.raw","wb");
+
+	unsigned char *data=(unsigned char *)destImg.getdata();
+
+	fwrite(data, sizeof(unsigned char), destImg.size(), p);
 	fclose(p);
 	fflush(stdout);
 

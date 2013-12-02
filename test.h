@@ -82,19 +82,19 @@ static void Ishowsurface(CImg<double> & img, int argc,char **argv)
 }
 static void IShowraw (Raw& raw,int argc,char **argv)
 {
-	CImg <double> sourceimage(raw.getXsize(),raw.getYsize(),raw.getZsize(),1,0);
+	CImg <float> sourceimage(raw.getXsize(),raw.getYsize(),raw.getZsize(),1,0);
 	cimg_for_insideXYZ(sourceimage,x,y,z,0)
 	{
 		PIXTYPE val=raw.get(x,y,z);
-		if (val<1&&val>0)
-		{
-			sourceimage(x,y,z,0)=(double)(val);
-		}
-		else if (val>=1)
-		{
-			sourceimage(x,y,z,0)=(double)(1);
-		}
-		
+		//if (val<1&&val>0)
+		//{
+			sourceimage(x,y,z,0)=(float)(val);
+		//}
+		//else if (val>=1)
+		//{
+		//	sourceimage(x,y,z,0)=(float)(1);
+		//}
+		//
 	}
 	sourceimage.display("hello");
 	//Ishowsurface(sourceimage,argc,argv);

@@ -7,7 +7,7 @@
 
 //#include"vol_math_Raw3D_Independt.h"
 //#define u_char unsigned char
-#define PIXTYPE float
+#define PIXTYPE float 
 using namespace std;
 /************************************************************************/
 /* RawImage :three data types to be changed to double 
@@ -35,7 +35,9 @@ public:
 	void readImage( unsigned char * buf,char const *file ,int size);
 	void readImagesi(short  * buf,char const *file ,int size);
 	void readStream(short *buf,char const *file,int size);
+	void writeImagecolon(Raw& destImg);
 	void writeImage(Raw& destImg);
+	void writeImagesesmic(Raw &destImg);
 	float * buf2float(unsigned char *buf);
 	void save();
 };
@@ -228,5 +230,212 @@ public:
 		z[rawNum].put(ix,iy,iz,val);		//write 'val' at location ix,iy,iz.
 	};
 	void wipecopy(RawArray& src);			// copy, resize as needed.
+};
+//==============================RAW4D
+class Raw4D
+{
+private:   			//-----------------DATA----------------- 
+	unsigned int xsize, ysize, zsize, _spectrum;
+	bool _is_shared;
+	PIXTYPE *data;		// 1D array of PIXTYPE that are accessed as a 2D array.
+public:				//---------------init fcns-------------
+	Raw4D(unsigned int,unsigned int,unsigned int,unsigned int ,PIXTYPE*,bool=false);	
+	Raw4D( Raw4D& src,bool=false);
+	Raw4D(int,int,int,bool=false);
+	Raw4D(void);// constructor for 'empty' Raws
+	~Raw4D(void);		// destructor; releases memory
+	Raw4D& set_shared(bool);
+	int getXsize(void) {return xsize;};		// get # pixels per scanline
+	int getYsize(void) {return ysize;};		// get # of scanlines.
+	int getZsize(void) {return zsize;};		//get # of RawImage numbers
+	int size(){return xsize*ysize*zsize;};
+
+	void put(int ix, int iy,int iz, PIXTYPE val) {	// write 'val' at location ix,iy.iz.
+		data[ix + xsize*iy+xsize*ysize*iz] = val; 
+	};
+	inline PIXTYPE get(int ix, int iy,int iz) {	// read the value at ix,iy.
+		int index=ix + xsize*iy+xsize*ysize*iz;
+		return(data[index]); 
+	};
+	PIXTYPE *getdata(){return data;};
+	PIXTYPE getXYZ(int ixyz){		// read value at 1D address ixyz
+		return data[ixyz];
+	};
+	void putXYZ(int ixyz,PIXTYPE val){// write value at 1D address ixy
+		data[ixyz] = val;
+	};
+
+	inline void swap(Raw4D & volume)
+	{
+		std::swap(this->xsize,volume.xsize);
+		std::swap(this->ysize,volume.ysize);
+		std::swap(this->zsize,volume.zsize);
+		std::swap(this->data,volume.data);
+	}
+
+	inline Raw4D& operator = (Raw4D volume)
+	{
+		volume.swap(*this);
+		return *this;
+	}
+
+	Raw4D& operator+=(const Raw4D &volume)
+	{
+		for (int i = 0; i<size(); ++i)
+		{
+			this->data[i] += volume.data[i];
+		}
+		return *this;
+	}
+
+	Raw4D& operator+=(const PIXTYPE val)
+	{
+		for (int i = 0; i < size(); ++i)
+		{
+			this->data[i] += val;
+		}
+		return *this;
+	}
+
+	Raw4D operator+(const Raw4D &volume)
+	{
+		return Raw4D(*this, true) += volume;
+	}
+	Raw4D operator+(const PIXTYPE val)
+	{
+		return Raw4D(*this, true) += val;
+
+	}
+	Raw4D& operator-=(const Raw4D &volume)
+	{
+		for (int i = 0; i < size(); ++i)
+		{
+			this->data[i] -= volume.data[i];
+		}
+		return *this;
+	}
+	Raw4D& operator-=(const PIXTYPE val)
+	{
+		for (int i = 0; i< size(); ++i)
+		{
+			this->data[i] -= val;
+		}
+		return *this;
+	}
+	Raw4D operator -(const Raw4D &volume)
+	{
+		return Raw4D(*this, true) -= volume;
+
+	}
+	Raw4D operator -(const PIXTYPE val)
+	{
+		return Raw4D(*this, true) -= val;
+
+	}
+	Raw4D& operator *=(const Raw4D& img)
+	{
+		for (int i = 0; i < size(); ++i)
+			this->data[i] *= img.data[i];
+		return *this;
+	}
+
+	Raw4D& operator *=(const PIXTYPE val)
+	{
+		for (int i = 0; i < size(); ++i)
+			this->data[i] *= val;
+		return *this;
+	}
+
+	Raw4D operator *(const Raw4D& img)
+	{
+		return  Raw4D(*this, true) *= img;
+	}
+
+	Raw4D operator *(const PIXTYPE val)
+	{
+		return Raw4D(*this, true) *= val;
+	}
+
+	Raw4D& operator /=(const Raw4D& img)
+	{
+		for (int i = 0; i < size(); ++i)
+			this->data[i] /= img.data[i];
+		return *this;
+	}
+
+	Raw4D& operator/=(const PIXTYPE val)
+	{
+		for (int i = 0; i < size(); ++i)
+			this->data[i] /= val;
+		return *this;
+	}
+
+	Raw4D operator /(const Raw4D& img)
+	{
+		return Raw4D(*this, true) /= img;
+	}
+
+	Raw4D operator/(const PIXTYPE val)
+	{
+		return Raw4D(*this, true) /= val;
+	}
+
+	friend Raw4D operator/(const PIXTYPE val, const Raw4D& volume);
+	PIXTYPE& operator()(const unsigned int x) {
+		return data[x];
+	}
+
+	const PIXTYPE& operator()(const unsigned int x) const {
+		return data[x];
+	}
+
+	PIXTYPE& operator()(const unsigned int x, const unsigned int y) {
+		return data[x + y*xsize];
+	}
+
+	const PIXTYPE& operator()(const unsigned int x, const unsigned int y) const {
+		return data[x + y*xsize];
+	}
+
+	PIXTYPE& operator()(const unsigned int x, const unsigned int y, const unsigned int z) {
+		return data[x + y*(unsigned long)xsize + z*(unsigned long)xsize*ysize];
+	}
+
+	const PIXTYPE& operator()(const unsigned int x, const unsigned int y, const unsigned int z) const {
+		return data[x + y*(unsigned long)xsize + z*(unsigned long)xsize*ysize];
+	}
+
+	PIXTYPE& operator()(const unsigned int x, const unsigned int y, const unsigned int z, const unsigned int c) {
+		return data[x + y*(unsigned long)xsize + z*(unsigned long)xsize*ysize + c*(unsigned long)xsize*ysize*zsize];
+	}
+
+	const PIXTYPE& operator()(const unsigned int x, const unsigned int y, const unsigned int z, const unsigned int c) const {
+		return data[x + y*(unsigned long)xsize + z*(unsigned long)xsize*ysize + c*(unsigned long)xsize*ysize*zsize];
+	}
+
+	PIXTYPE& operator()(const unsigned int x, const unsigned int y, const unsigned int z, const unsigned int,
+		const unsigned long wh) {
+			return data[x + y*x + z*wh];
+	}
+
+	const PIXTYPE& operator()(const unsigned int x, const unsigned int y, const unsigned int z, const unsigned int,
+		const unsigned long wh) const {
+			return data[x + y*xsize + z*wh];
+	}
+
+	PIXTYPE& operator()(const unsigned int x, const unsigned int y, const unsigned int z, const unsigned int c,
+		const unsigned long wh, const unsigned long whd) {
+			return data[x + y*xsize + z*wh + c*whd];
+	}
+
+	const PIXTYPE& operator()(const unsigned int x, const unsigned int y, const unsigned int z, const unsigned int c,
+		const unsigned long wh, const unsigned long whd) const {
+			return data[x + y*xsize + z*wh + c*whd];
+	}
+
+
+
+
+
 };
 #endif

@@ -344,7 +344,7 @@ Raw2D ImageFSqrt(Raw2D &x,Raw2D &y)
 	{
 		for(j=0;j<n;j++)
 		{
-			val=sqrt(PIXTYPE(x.get(i,j)*x.get(i,j) + y.get(i,j)*y.get(i,j)));
+			val=(PIXTYPE)sqrt((x.get(i,j)*x.get(i,j) + y.get(i,j)*y.get(i,j)));
 			ret.put(i,j,val);
 		}
 	}

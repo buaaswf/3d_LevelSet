@@ -275,7 +275,9 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 		phi += phi_x;
 		if (i=iter-1)
 		{
+			distRegTerm = (del2(phi) *= 6.0) -= curvature;
 			phi +=distRegTerm;
+
 		}
 		//IShowraw(volumeTerm,1,&p1);
 		//phi=phi +(distRegTerm)*mu* double(timestep) +(areaTerm)*lambda + (volumeTerm)*alfa;
@@ -316,6 +318,52 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 	//delete vy;
 	//delete vz;
 }
+void ThreeDim_LevelSet::outerwall(Raw &phi,char *potentialFunction)
+{
+
+	Raw distRegTerm(phi);
+
+	for(int i=0;i<4;i++)
+	{
+		float smallNumber=1e-10;
+
+		NeumannBoundCond(distRegTerm);
+		Raw phi_x = gradientxgc(distRegTerm);
+		Raw phi_y = gradientygc(distRegTerm);
+		Raw phi_z = gradientzgc(distRegTerm);
+		Raw s = ImageFSqrt(phi_x, phi_y, phi_z) += smallNumber;
+
+		phi_x /= s;
+		phi_y /= s;
+		phi_z /= s;
+
+		s.~Raw();
+
+		Raw curvature = div(phi_x, phi_y, phi_z);
+	
+		char *p1="single_well";
+		
+		if (0 == strcmp(potentialFunction, p1))
+		{
+			/*
+			compute distance regularization term in equation (13) 
+			with the single-well potential p1.
+			*/
+			distRegTerm = (del2(distRegTerm) *= 6.0) -= curvature;
+		} else if (0 == strcmp(potentialFunction, "double_well")) {
+			distRegTerm = distReg_p2(distRegTerm);  // compute the distance regularization term in eqaution (13) with the double-well potential p2.
+		} else {
+			cout << "EEROR" << endl;
+		}
+		
+	}
+	distRegTerm+=distRegTerm;
+
+
+
+}
+
+
 ThreeDim_LevelSet::ThreeDim_LevelSet(void)
 {
 

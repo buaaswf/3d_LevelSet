@@ -6,6 +6,7 @@
 #include "CImg.h" 
 #include "ThreeDim_LevelSet.h"
 #include "Filter.h"
+#include "WipeNioisePde.h"
 
 using namespace cimg_library;
 using namespace std;
@@ -13,7 +14,7 @@ using namespace std;
 void testcolon(int argc,char **argv)
 {
 	char *pt="single_well";
-	int l=512,m=512,n=60,l1=0,l2=0,iter_outer=5;
+	int l=512,m=512,n=60,l1=0,l2=0,iter_outer=30;
 	//int LX=0,LY=0,LZ=0;
 	
 	RawImage test;
@@ -49,7 +50,7 @@ void testcolon(int argc,char **argv)
 	{
 		inputo[i]=(float) indata[i];
 	}
-
+	//delete [] inputo;
 	Raw *input=new Raw(l,m,n,inputo);
 	int width=10;
 	//for (int i=0;i<l;i++)
@@ -130,7 +131,7 @@ void testcolon(int argc,char **argv)
 	//}
 	//IShowraw(*initial,argc,argv);
 	RawImage *write=new RawImage();
-
+	IShowraw(*input,1,argv);
 	ThreeDim_LevelSet *ls=new ThreeDim_LevelSet();
 	//IShowraw(*input,argc,argv);
 	ls->initialg(*input);
@@ -148,10 +149,12 @@ for (int i=0; i<input->getXsize(); i++)
 
 		}
 	}
+
 }
-	IShowraw(*input,argc,argv);
-	IShowraw(*initial,argc,argv);
+	//IShowraw(*input,argc,argv);
+	//IShowraw(*initial,argc,argv);
 	ls->minimal_surface(*initial,*input,5.0,0.1,-3,1.5,1,iter_outer,pt);
+	ls->outerwall(*initial,pt);
 	IShowraw(*initial,argc,argv);
 	test.writeImage(*initial);
 
@@ -334,10 +337,43 @@ void testeasy(int argc,char **argv)
 
 
 }
+void testanistropic(int argc,char **argv)
+{//sqrt change 
+	//datatype write data	test.writeImage(*output);
+	char *pt="single_well";
+	int l=281,m=481,n=100,l1=0,l2=0,iter_outer=30;
+	//int LX=0,LY=0,LZ=0;
+
+	RawImage test;
+	unsigned char * indata=new unsigned char [l*m*n];
+	//short * indata=new short  [l*m*n];
+
+
+	test.readImage(indata,"F:\\lab\\VTKproj\\mig.raw",l*m*n);
+	Raw *initial=new Raw(l,m,n);
+	unsigned char *inputo=new PIXTYPE[l*m*n];
+	for (int i = 0; i < l*m*n; i++)
+	{
+		inputo[i]=(unsigned char) indata[i];
+	}
+	delete [] indata;
+	
+	Raw *input=new Raw(l,m,n,inputo);
+
+	IShowraw(*input,1,argv);
+	WipeNioisePde *pm=new WipeNioisePde(*input,1,1.0,0);
+	Raw  * output=new Raw (pm->FourPDiff(*input));
+	//test.writeImage();
+	IShowraw(*output,1,argv);
+	test.writeImage(*output);
+	
+}
 int main(int argc,char **argv)
 {
 	//testlittle(argc,argv);
-	testcolon(argc,argv);
+	//testcolon(argc,argv);
+	//cout<<sizeof(float)<<endl;
+	testanistropic(argc,argv);
 	//testeasy(argc,argv);
 	system("pause");
 	return 0;

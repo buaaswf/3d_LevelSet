@@ -7,7 +7,7 @@
 #include <iostream>
 using namespace std;
 
-typedef double PIXTYPE;
+typedef float PIXTYPE;
 class Raw2DArray;
 class Raw2D
 {

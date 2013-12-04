@@ -1,5 +1,4 @@
 #include "vol_math_trilateralfilter.h"
-
 static float lgtt=log10(2.0f);
 //=====================================================================================================
 trilateralfilter::trilateralfilter(RawImage* img)
@@ -19,7 +18,7 @@ trilateralfilter::~trilateralfilter(void)
 //	Raw* pSrcImg=this->raw;
 //	Raw destImg; 			
 //	Raw fTheta; 			//stores Adaptive neighborhood size for each pixel
-//	RawArray  minGradientStack;
+//	RawArray  minGradientStack;	
 //	RawArray  maxGradientStack; 
 //	Raw xGradient, yGradient,zGradient; 	//X and Y gradients of the input RawImage
 //	Raw xSmoothGradient, ySmoothGradient,zSmoothGradient; 	//Bilaterally filtered X and Y gradients of the input RawImage
@@ -107,7 +106,7 @@ trilateralfilter::~trilateralfilter(void)
 //	//wipecopy(&destImg);
 //
 //	FILE *p=fopen("F:\\3D.raw","ab+");
-//	fwrite(destImg.data,sizeof(PIXTYPE),281*481*100,p);
+//	fwrite(destImg.getdata(),sizeof(PIXTYPE),281*481*100,p);
 //	fclose(p);
 //	fflush(stdout);
 //

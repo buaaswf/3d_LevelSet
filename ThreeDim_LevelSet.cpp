@@ -232,7 +232,7 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 	{
 		float smallNumber=1e-10;
 
-		NeumannBoundCond(phi);
+		//NeumannBoundCond(phi);
 		Raw phi_x = gradientxgc(phi);
 		Raw phi_y = gradientygc(phi);
 		Raw phi_z = gradientzgc(phi);
@@ -273,12 +273,12 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 
 		phi += (distRegTerm)*mu*((double)timestep);
 		phi += phi_x;
-		if (i=iter-1)
-		{
-			distRegTerm = (del2(phi) *= 6.0) -= curvature;
-			phi +=distRegTerm;
+		//if (i=iter-1)
+		//{
+		//	distRegTerm = (del2(phi) *= 6.0) -= curvature;
+		//	phi +=distRegTerm;
 
-		}
+		//}//test for
 		//IShowraw(volumeTerm,1,&p1);
 		//phi=phi +(distRegTerm)*mu* double(timestep) +(areaTerm)*lambda + (volumeTerm)*alfa;
 		//IShowraw(phi,1,&potentialFunction);
@@ -318,48 +318,83 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 	//delete vy;
 	//delete vz;
 }
-void ThreeDim_LevelSet::outerwall(Raw &phi,char *potentialFunction)
+Raw outwallpull(Raw &src)
+{
+	Raw pull(src);
+	for (int i=0;i<src.getXsize();i++)
+	{
+		for (int j=0;j<src.getYsize();j++)
+		{
+			for (int k=0;k<src.getZsize();k++)
+			{
+				if (i<3&&j<3&&k<3)
+				{
+					pull.put(i,j,k,100);
+				} 
+				else
+				{
+					pull.put(i,j,k,0);
+				}
+				
+
+			}
+		}
+	}
+
+
+
+	return pull;
+}
+
+
+
+void ThreeDim_LevelSet::outerwall(Raw &src,Raw &phi,double lambda,double mu,double alfa,float epsilon,int timestep,int iter,char *potentialFunction)
 {
 
-	Raw distRegTerm(phi);
+	//Raw distRegTerm(phi);
 
-	for(int i=0;i<4;i++)
-	{
-		float smallNumber=1e-10;
+	//for(int i=0;i<4;i++)
+	//{
+	//	float smallNumber=1e-10;
 
-		NeumannBoundCond(distRegTerm);
-		Raw phi_x = gradientxgc(distRegTerm);
-		Raw phi_y = gradientygc(distRegTerm);
-		Raw phi_z = gradientzgc(distRegTerm);
-		Raw s = ImageFSqrt(phi_x, phi_y, phi_z) += smallNumber;
+	//	NeumannBoundCond(distRegTerm);
+	//	Raw phi_x = gradientxgc(distRegTerm);
+	//	Raw phi_y = gradientygc(distRegTerm);
+	//	Raw phi_z = gradientzgc(distRegTerm);
+	//	Raw s = ImageFSqrt(phi_x, phi_y, phi_z) += smallNumber;
 
-		phi_x /= s;
-		phi_y /= s;
-		phi_z /= s;
+	//	phi_x /= s;
+	//	phi_y /= s;
+	//	phi_z /= s;
 
-		s.~Raw();
+	//	s.~Raw();
 
-		Raw curvature = div(phi_x, phi_y, phi_z);
-	
-		char *p1="single_well";
+	//	Raw curvature = div(phi_x, phi_y, phi_z);
+	//
+	//	char *p1="single_well";
+	//	
+	//	if (0 == strcmp(potentialFunction, p1))
+	//	{
+	//		/*
+	//		compute distance regularization term in equation (13) 
+	//		with the single-well potential p1.
+	//		*/
+	//		distRegTerm = (del2(distRegTerm) *= 6.0) -= curvature;
+	//	} else if (0 == strcmp(potentialFunction, "double_well")) {
+	//		distRegTerm = distReg_p2(distRegTerm);  // compute the distance regularization term in eqaution (13) with the double-well potential p2.
+	//	} else {
+	//		cout << "EEROR" << endl;
+	//	}
+	//	
+	//}
+	//distRegTerm+=distRegTerm;
+	this->initialg(src);
+
+	Raw pull=outwallpull(phi);
+	this->initialg(pull);
+	this->minimal_surface(phi,pull,lambda,mu,-10,epsilon,timestep,iter,potentialFunction);
+	//this->minimal_surface(phi,src,lambda,mu,-alfa,epsilon,timestep,iter,potentialFunction);
 		
-		if (0 == strcmp(potentialFunction, p1))
-		{
-			/*
-			compute distance regularization term in equation (13) 
-			with the single-well potential p1.
-			*/
-			distRegTerm = (del2(distRegTerm) *= 6.0) -= curvature;
-		} else if (0 == strcmp(potentialFunction, "double_well")) {
-			distRegTerm = distReg_p2(distRegTerm);  // compute the distance regularization term in eqaution (13) with the double-well potential p2.
-		} else {
-			cout << "EEROR" << endl;
-		}
-		
-	}
-	distRegTerm+=distRegTerm;
-
-
 
 }
 

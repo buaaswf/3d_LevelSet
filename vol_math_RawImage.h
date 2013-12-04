@@ -7,7 +7,7 @@
 
 //#include"vol_math_Raw3D_Independt.h"
 //#define u_char unsigned char
-#define PIXTYPE float 
+#define PIXTYPE float
 using namespace std;
 /************************************************************************/
 /* RawImage :three data types to be changed to double 
@@ -38,6 +38,7 @@ public:
 	void writeImagecolon(Raw& destImg);
 	void writeImage(Raw& destImg);
 	void writeImagesesmic(Raw &destImg);
+	void readImage2(float * buf,char const *file ,int size);
 	float * buf2float(unsigned char *buf);
 	void save();
 };

@@ -47,6 +47,20 @@ void RawImage::readImage(unsigned char * buf,char const *file ,int size)
 	fclose(op);
 	printf("read is ok\n");
 }
+void RawImage::readImage2(float * buf,char const *file ,int size)
+{
+	FILE * op=fopen(file,"rb");
+	if(op==NULL)
+	{
+		printf("open fail");
+	}
+	//unsigned char * unsignedbuf=new unsigned char[size];
+	//fseek(op,281*481*500L,SEEK_SET);
+	fread(buf,sizeof(float),size,op);
+
+	fclose(op);
+	printf("read is ok\n");
+}
 void RawImage::readStream(short* buf,char const *filename,int size)
 {
 	int lx=0,ly=0,lz=0;
@@ -62,7 +76,7 @@ void RawImage::readStream(short* buf,char const *filename,int size)
 	//cout<<sizeof(int)<<endl;
 	//cout<<sizeof(short)<<endl;
 	//cout<<"lx="<<lx<<",ly="<<ly<<",lz="<<lz<<endl;
-	file.seekg(24L+512*512*345*sizeof(short),ios::beg);
+	//file.seekg(24L+512*512*345*sizeof(short),ios::beg);//+512*512*345*sizeof(short)
 	file.read((char *)buf,size);
 	file.close();
 

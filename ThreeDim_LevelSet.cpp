@@ -232,7 +232,7 @@ void ThreeDim_LevelSet::minimal_surface(Raw &phi,Raw &g,double lambda,double mu,
 	{
 		float smallNumber=1e-10;
 
-		NeumannBoundCond(phi);
+		//NeumannBoundCond(phi);
 		Raw phi_x = gradientxgc(phi);
 		Raw phi_y = gradientygc(phi);
 		Raw phi_z = gradientzgc(phi);
@@ -393,7 +393,7 @@ void ThreeDim_LevelSet::outerwall(Raw &src,Raw &phi,double lambda,double mu,doub
 	Raw pull=outwallpull(phi);
 	this->initialg(pull);
 	this->minimal_surface(phi,pull,lambda,mu,-10,epsilon,timestep,iter,potentialFunction);
-	this->minimal_surface(phi,src,lambda,mu,-alfa,epsilon,timestep,iter,potentialFunction);
+	//this->minimal_surface(phi,src,lambda,mu,-alfa,epsilon,timestep,iter,potentialFunction);
 		
 
 }
@@ -455,8 +455,8 @@ void ThreeDim_LevelSet::NeumannBoundCond( Raw &img )
 	{
 		for (k=2;j<ndepth-2;k++)
 		{
-			img.put(i,0,k,img.get(i,3,k));
-			img.put(i,ncol-1,k,img.get(i,ncol-3,k));
+			img.put(i,0,k,img.get(i,j,3));
+			img.put(i,ncol-1,k,img.get(i,j,ndepth-3));
 
 		}
 

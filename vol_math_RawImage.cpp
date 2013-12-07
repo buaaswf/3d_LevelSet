@@ -61,9 +61,8 @@ void RawImage::readImage2(float * buf,char const *file ,int size)
 	fclose(op);
 	printf("read is ok\n");
 }
-short * RawImage::readStream(char const *filename,int *l,int * m,int  * n)
+void RawImage::readStream(short* buf,char const *filename,int size)
 {
-	
 	int lx=0,ly=0,lz=0;
 	ifstream file;
 	file.open(filename, ios::out | ios::app | ios::binary);
@@ -74,13 +73,13 @@ short * RawImage::readStream(char const *filename,int *l,int * m,int  * n)
 	file.read(reinterpret_cast<char *>(&lx),sizeof(int));
 	file.read(reinterpret_cast<char *>(&ly),sizeof(int));
 	file.read(reinterpret_cast<char *>(&lz),sizeof(int));
-	int size=lx*ly*lz*sizeof(short);
-	*l=lx;*m=ly;*n=lz;
-	short *buf=new short[size];
-	file.seekg(24L,ios::beg);//+512*512*345*sizeof(short)
+	//cout<<sizeof(int)<<endl;
+	//cout<<sizeof(short)<<endl;
+	//cout<<"lx="<<lx<<",ly="<<ly<<",lz="<<lz<<endl;
+	//file.seekg(24L+512*512*345*sizeof(short),ios::beg);//+512*512*345*sizeof(short)
 	file.read((char *)buf,size);
 	file.close();
-	return buf;
+
 
 }
 void RawImage::readImagesi(short  * buf,char const *file ,int size)
@@ -141,17 +140,27 @@ void RawImage::writeImagecolon(Raw &destImg)
 }
 void RawImage::writeImage(Raw &destImg)
 {
-	FILE *p=fopen("K:\\3Dlevelcolon.raw","wb");
+	FILE *p=fopen("F:\\3Dlevel.raw","wb");
 	//char* data = double2char(destImg.getdata(), destImg.size());
 	PIXTYPE *data=(PIXTYPE *)destImg.getdata();
-	for (int i=0;i<destImg.getZsize();i++)
+	//for (int i=0;i<destImg.getXsize()*destImg.getYsize()*destImg.getZsize();i++)
+	//{
+
+	//	if (data[i]<1)
+	//	{
+	//		data[i]=data[i];
+	//	}
+	//	else data[i]=0;
+
+	//}
+	/*for (int i=0;i<destImg.getZsize();i++)
 	{
 		for (int j=0;j<destImg.getYsize();j++)
 		{
 			for (int k=0;k<destImg.getXsize();k++)
 			{
 				PIXTYPE *val=&data[i*destImg.getXsize()*destImg.getYsize()+j*destImg.getXsize()+k];
-				if(k<409 &&k> 107 && j>156 &&j <390)
+				if(k<451 &&k> 45 && j>162 &&j <391)
 				{
 					if (*val>1)
 					{
@@ -163,7 +172,7 @@ void RawImage::writeImage(Raw &destImg)
 				else *val=0;
 			}
 		}
-	}
+	}*/
 	fwrite(data, sizeof(PIXTYPE), destImg.size(), p);
 	fclose(p);
 	fflush(stdout);

@@ -15,138 +15,56 @@ void testcolon(int argc,char **argv)
 {
 	
 	char *pt="single_well";
-	int l=501,m=1741,n=1,l1=0,l2=0,iter_outer=5;
+	int l=0,m=0,n=0,l1=0,l2=0,iter_outer=1;
 	//cin>> l >> m >> n;
 	//int LX=0,LY=0,LZ=0;
 	
 	RawImage test;
 	//unsigned char * indata=new unsigned char [l*m*n];
-	float * indata=new float  [l*m*n];
-	//Raw *inputeasy=new Raw(l,m,n);
 	
-	//for (int i=0;i<l;i++)
-	//{
-	//	for (int j=0;j<m;j++)
-	//	{
-	//		for (int k=0;k<n;k++)
-	//		{
-	//			if (i>l1 && j>l1 && k>l1 && i<l2 && j<l2 && k<l2)
-	//			{
-	//				inputeasy->put(i,j,k,20.0);
-
-	//			}
-	//			else inputeasy->put(i,j,k,0);
-
-	//		}
-	//	}
-	//}
-	//test.readImage(indata,"E:\\geo\\lobster.raw",301*324*56);
-
-	//test.readImage(indata,"E:\\volume\\cthead-8bit\\cthead-8bit.raw",256*256*99);
-	//test.readImage(indata,"E:\\volume\\little\\little.raw",256*256*26);
 
 	//test.readStream(indata,"E:\\volume\\clean\\WI_3032_P_iso_clean.raw",l*m*n);
-	test.readImage2(indata,"E:\\volume\\a_501_1741.raw",l*m*n);
+	short * indata=test.readStream("K:\\sdf\\volume\\clean\\WI_3119_P_iso_clean.raw",&l,&m,&n);
 	Raw *initial=new Raw(l,m,n);
 	float *inputo=new float[l*m*n];
 	for (int i = 0; i < l*m*n; i++)
 	{
-		if (indata[i]>230)
-		{
-			inputo[i]=(float) indata[i];
-		} 
-		else
-		{
-			inputo[i]=0;
-		}
-		
+		inputo[i]=(float) indata[i];		
 	}
+
+	//for (int i=0;i<l;i++)
+	//{
+	//	for (int j=0;j<m;j++)
+	//	{
+	//		for (int k=0;k<n;k++)
+	//		{
+	//			PIXTYPE *val=inputo+i*m*n+k*n+k;
+	//			if(k<473 &&k> 37 && j>164 &&j <373)
+	//			{
+
+	//				if (*val!=-924)
+	//				{
+	//					*val=0;
+
+	//				}
+	//				//else *val=100;
+	//			}
+	//			else *val=0;
+	//		}
+	//	}
+	//}
 	Raw *input=new Raw(l,m,n,inputo);
 	
-	int width=10;
-	//for (int i=0;i<l;i++)
-	//{
-	//	for (int j=0;j<m;j++)
-	//	{
-	//		for (int k=0;k<n;k++)
-	//		{
 
-	//			if (i>l1+width && j>l1+width && k>l1+width && i<l2-width && j<l2-width && k<l2-width)
-	//			{
-	//				initial->put(i,j,k,-2.0);
-	//			} 
-	//			else if (i<l1+width || j<l1+width || k < l1+width || i>l2-width || j>l2-width || k> l2-width)
-	//			{
-	//				initial->put(i,j,k,2.0);
-	//			}
-	//			else {
-	//				initial->put(i,j,k,-2.0);
-	//			}
 
-	//		}
-	//	}
-	//}
-	//int x1=84,x2=123,y1=118,y2=180,z1=19,z2=24; //test for little data
-
-	//int x1=257,x2=299,y1=345,y2=358,z1=6,z2=16; //test for colon data inside 
-	//int x1=225,x2=346,y1=301,y2=398,z1=6,z2=16; //test for colon data outside 
-	//	int x1=140,x2=405,y1=269,y2=372,z1=1,z2=30; //test for colon data outside 
-	//	int x12,x22,y12,y22,z12,z22;
-	//	int x13,x23,y13,y23,z13,z23;
-	//	int x14,x24,y14,y24,z14,z24;
-	//for (int i=0;i<l;i++)
-	//{
-	//	for (int j=0;j<m;j++)
-	//	{
-	//		for (int k=0;k<n;k++)
-	//		{
-	//			//region 1
-	//			if (i>x1 && j>y1 && k>z1 && i<x2 && j<y2 && k<z2)
-	//			{
-	//				initial->put(i,j,k,-2.0);
-	//			} 
-	//			else if (i<x1|| j<y1 || k < z1 || i>x2 || j>y2 || k> z2)
-	//			{
-	//				initial->put(i,j,k,2.0);
-	//			}
-	//			else {
-	//				initial->put(i,j,k,-2.0);
-	//			}
-	//			//region 2
-	//			if (i>x12 && j>y12 && k>z12 && i<x22 && j<y22 && k<z22)
-	//			{
-	//				initial->put(i,j,k,-2.0);
-	//			} 
-	//			else if (i<x12|| j<y12 || k < z12 || i>x22 || j>y22 || k> z22)
-	//			{
-	//				initial->put(i,j,k,2.0);
-	//			}
-	//			else {
-	//				initial->put(i,j,k,-2.0);
-	//			}
-	//			//region 3
-	//			if (i>x13 && j>y13 && k>z13 && i<x23 && j<y23 && k<z23)
-	//			{
-	//				initial->put(i,j,k,-2.0);
-	//			} 
-	//			else if (i<x14|| j<y14 || k < z14 || i>x24 || j>y24 || k> z24)
-	//			{
-	//				initial->put(i,j,k,2.0);
-	//			}
-	//			else {
-	//				initial->put(i,j,k,-2.0);
-	//			}
-
-	//		}
-	//	}
-	//}
 	//IShowraw(*initial,argc,argv);
 	RawImage *write=new RawImage();
-	IShowraw(*input,1,argv);
-	Raw bak(*input);
+	//IShowraw(*input,1,argv);
+	//Raw bak(*input);
 	ThreeDim_LevelSet *ls=new ThreeDim_LevelSet();
-	//IShowraw(*input,argc,argv);
+
 	ls->initialg(*input);
+	//IShowraw(*input,argc,argv);
 	for (int i=0; i<input->getXsize(); i++)
 	{
 		for (int j=0; j<input->getYsize(); j++)
@@ -166,6 +84,7 @@ void testcolon(int argc,char **argv)
 	//IShowraw(*input,argc,argv);
 	//IShowraw(*initial,argc,argv);
 	ls->minimal_surface(*initial,*input,5.0,0.1,-3,1.5,1,iter_outer,pt);
+	//IShowraw(*initial,argc,argv);
 	//for (int i=0;i<initial->getXsize();i++)
 	//{
 	//	for (int j=0;j<initial->getYsize();j++)
@@ -186,8 +105,8 @@ void testcolon(int argc,char **argv)
 	//}
 	//*initial*=bak;
 	//ls->outerwall(*initial,*input,5.0,0.1,-3,1.5,1,iter_outer,pt);
-	IShowraw(*initial,argc,argv);
-	//test.writeImage(*initial);
+	//IShowraw(*initial,argc,argv);
+	test.writeImage(*initial);
 	//delete [] inputo;
 
 
